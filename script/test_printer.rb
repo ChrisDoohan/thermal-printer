@@ -6,7 +6,8 @@ class Printer
   DEVICE_PATH = "/dev/usb/lp0"
 
   def initialize
-    @escpos = Escpos::Printer.new
+    @buffer = "".b
+    @initialized = false
   end
 
   def available?
@@ -14,18 +15,32 @@ class Printer
   end
 
   def send_text(text)
-    @escpos << text
+    init_printer unless @initialized
+    @buffer << text.encode("CP1252", undef: :replace, replace: "?")
+  end
+
+  def send_line(line)
+    send_text(line + "\n")
   end
 
   def cut
-    @escpos << "\n\n\n\n\n\n"
-    @escpos.partial_cut!
-    write_to_device
+    @buffer << "\n\n\n\n\n"
+    @buffer << Escpos::Helpers.partial_cut
+    flush
   end
 
-  def write_to_device
-    File.open(DEVICE_PATH, "wb") { |f| f.write(@escpos.to_escpos) }
-    @escpos = Escpos::Printer.new
+  def flush
+    File.open(DEVICE_PATH, "wb") { |f| f.write(@buffer) }
+    @buffer = "".b
+  end
+
+  private
+
+  def init_printer
+    @buffer << "\x1B\x40"     # ESC @ - Initialize printer
+    @buffer << "\x1C\x2E"     # Cancel CJK mode (FS .)
+    @buffer << "\x1B\x74\x06" # Set code page to CP1252 (ESC t 6)
+    @initialized = true
   end
 end
 
@@ -38,12 +53,28 @@ unless printer.available?
   exit 1
 end
 
-# Cancel CJK mode (FS .) then set code page to CP850
-printer.send_text("\x1C\x2E")
-printer.send_text(Escpos::Helpers.set_printer_encoding(Escpos::CP_CP850))
-printer.send_text("Saut\u00E9ed vegetables\n".encode("CP850"))
+# test_lines = [
+#   "àáâãäå ÀÁÂÃÄÅ",
+#   "èéêë ÈÉÊË",
+#   "ìíîï ÌÍÎÏ",
+#   "òóôõö ÒÓÔÕÖ",
+#   "ùúûü ÙÚÛÜ",
+#   "ýÿ ÝŸ",
+#   "ñ Ñ ç Ç",
+#   "æ Æ ø Ø å Å",
+#   "ß ð Ð þ Þ",
+#   "½ ° € £ ¥ ¢",
+# ]
 
-printer.send_text("Plain ASCII for comparison\n")
+# test_lines.each do |line|
+#   printer.send_line(line)
+# end
+
+printer.send_text("Sentence 1")
+printer.flush
+printer.send_text("Sentence 2")
+printer.flush
+
 printer.cut
 
 puts "Done!"
