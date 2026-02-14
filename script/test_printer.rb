@@ -38,11 +38,12 @@ unless printer.available?
   exit 1
 end
 
-printer.send_text("This is a test of printing without cutting.\n")
-printer.write_to_device
+# Cancel CJK mode (FS .) then set code page to CP850
+printer.send_text("\x1C\x2E")
+printer.send_text(Escpos::Helpers.set_printer_encoding(Escpos::CP_CP850))
+printer.send_text("Saut\u00E9ed vegetables\n".encode("CP850"))
 
-printer.send_text("Hello from the Printer class!\n")
-printer.send_text("This is a second write.\n")
+printer.send_text("Plain ASCII for comparison\n")
 printer.cut
 
 puts "Done!"
