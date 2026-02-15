@@ -35,12 +35,19 @@
   <!-- Processing section -->
   <div id="process-section" class="editor-section" style="display:none;">
     <div class="preview-area">
-      <canvas id="preview-canvas"></canvas>
+      <div id="paper-underlay" class="paper-underlay portrait">
+        <div class="paper-feed-arrow"></div>
+        <canvas id="preview-canvas"></canvas>
+      </div>
     </div>
 
     <div class="controls">
       <div class="control-row">
-        <label>Rotation</label>
+        <label>Orientation</label>
+        <div class="orientation-buttons">
+          <button class="btn btn-small orientation-btn active" data-orientation="portrait" title="Paper feeds along height">&#x2195;</button>
+          <button class="btn btn-small orientation-btn" data-orientation="landscape" title="Paper feeds along width">&#x2194;</button>
+        </div>
         <div class="rotation-buttons">
           <button class="btn btn-small rotation-btn active" data-rotation="0">0&deg;</button>
           <button class="btn btn-small rotation-btn" data-rotation="90">90&deg;</button>

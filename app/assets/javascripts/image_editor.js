@@ -10,6 +10,7 @@
   var baseWidth = 0;
   var baseHeight = 0;
   var rotation = 0;
+  var orientation = 'portrait';  // 'portrait' = width→512, 'landscape' = height→512
   var invertOn = false;
   var ditherMode = 'floyd-steinberg';
 
@@ -165,9 +166,14 @@
     contrastVal.textContent = '0';
     whitepointVal.textContent = '0';
     rotation = 0;
+    orientation = 'portrait';
     invertOn = false;
     ditherMode = 'floyd-steinberg';
     invertBtn.classList.remove('active');
+
+    var orientBtns = document.querySelectorAll('.orientation-btn');
+    orientBtns.forEach(function(b) { b.classList.remove('active'); });
+    orientBtns[0].classList.add('active');
 
     var rotBtns = document.querySelectorAll('.rotation-btn');
     rotBtns.forEach(function(b) { b.classList.remove('active'); });
@@ -195,15 +201,44 @@
   function rebuildGrayscale() {
     var rotated = applyRotation(sourceCanvas, rotation);
 
-    // Scale to printer width
-    var scale = PRINTER_WIDTH / rotated.width;
-    var w = PRINTER_WIDTH;
-    var h = Math.round(rotated.height * scale);
+    var w, h;
+    if (orientation === 'portrait') {
+      // Width maps to paper width (512px)
+      if (rotated.width > PRINTER_WIDTH) {
+        var scale = PRINTER_WIDTH / rotated.width;
+        w = PRINTER_WIDTH;
+        h = Math.round(rotated.height * scale);
+      } else {
+        w = rotated.width;
+        h = rotated.height;
+      }
+    } else {
+      // Landscape: height maps to paper width (512px)
+      if (rotated.height > PRINTER_WIDTH) {
+        var scale = PRINTER_WIDTH / rotated.height;
+        h = PRINTER_WIDTH;
+        w = Math.round(rotated.width * scale);
+      } else {
+        w = rotated.width;
+        h = rotated.height;
+      }
+    }
+
+    // Pad dimensions to multiples of 8
+    var paddedW = Math.ceil(w / 8) * 8;
+    var paddedH = Math.ceil(h / 8) * 8;
 
     var temp = document.createElement('canvas');
-    temp.width = w;
-    temp.height = h;
-    temp.getContext('2d').drawImage(rotated, 0, 0, w, h);
+    temp.width = paddedW;
+    temp.height = paddedH;
+    var tempCtx = temp.getContext('2d');
+    // Fill with white first (for padding pixels)
+    tempCtx.fillStyle = '#ffffff';
+    tempCtx.fillRect(0, 0, paddedW, paddedH);
+    tempCtx.drawImage(rotated, 0, 0, w, h);
+
+    w = paddedW;
+    h = paddedH;
 
     var imageData = temp.getContext('2d').getImageData(0, 0, w, h);
     var data = imageData.data;
@@ -217,6 +252,13 @@
     grayscaleBase = gray;
     baseWidth = w;
     baseHeight = h;
+
+    updatePaperUnderlay();
+  }
+
+  function updatePaperUnderlay() {
+    var underlay = document.getElementById('paper-underlay');
+    underlay.className = 'paper-underlay ' + orientation;
   }
 
   function applyRotation(srcCanvas, degrees) {
@@ -364,6 +406,17 @@
     runPipeline();
   });
 
+  // Orientation buttons
+  document.querySelectorAll('.orientation-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.orientation-btn').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      orientation = btn.dataset.orientation;
+      rebuildGrayscale();
+      runPipeline();
+    });
+  });
+
   // Rotation buttons
   document.querySelectorAll('.rotation-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -404,7 +457,22 @@
   }
 
   function sendPrint(cut) {
-    var dataUrl = previewCanvas.toDataURL('image/png');
+    var sendCanvas = previewCanvas;
+
+    // In landscape mode, rotate 90° CCW so the image prints sideways
+    // (the preview shows it upright with paper going horizontally,
+    // but the printer needs it rotated so height becomes width)
+    if (orientation === 'landscape') {
+      sendCanvas = document.createElement('canvas');
+      sendCanvas.width = previewCanvas.height;
+      sendCanvas.height = previewCanvas.width;
+      var ctx = sendCanvas.getContext('2d');
+      ctx.translate(0, sendCanvas.height);
+      ctx.rotate(-Math.PI / 2);
+      ctx.drawImage(previewCanvas, 0, 0);
+    }
+
+    var dataUrl = sendCanvas.toDataURL('image/png');
     var token = document.querySelector('meta[name="csrf-token"]').content;
     var printUrl = document.getElementById('editor-config').dataset.printUrl;
 

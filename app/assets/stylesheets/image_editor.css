@@ -64,14 +64,65 @@
 
 .preview-area {
   margin-bottom: 15px;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 450px;
+}
+
+.paper-underlay {
+  position: relative;
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+}
+
+.paper-underlay.portrait {
+  /* Paper extends vertically beyond the image */
+  padding: 50px 0;
+  border-left: 1px dashed rgba(255, 255, 255, 0.25);
+  border-right: 1px dashed rgba(255, 255, 255, 0.25);
+  border-top: none;
+  border-bottom: none;
+}
+
+.paper-underlay.landscape {
+  /* Paper extends horizontally beyond the image */
+  padding: 0 50px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.25);
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.25);
+  border-left: none;
+  border-right: none;
+}
+
+.paper-feed-arrow {
+  position: absolute;
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 18px;
+  pointer-events: none;
+}
+
+.portrait .paper-feed-arrow::before {
+  content: '▼';
+  position: absolute;
+  bottom: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.landscape .paper-feed-arrow::before {
+  content: '▶';
+  position: absolute;
+  right: -24px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 #preview-canvas {
+  display: block;
   width: 100%;
-  max-width: 512px;
+  max-width: 460px;
   image-rendering: pixelated;
-  border-radius: 4px;
 }
 
 /* === Controls === */
@@ -129,10 +180,16 @@
   border: none;
 }
 
+.orientation-buttons,
 .rotation-buttons,
 .mode-buttons {
   display: flex;
   gap: 4px;
+}
+
+.orientation-btn {
+  font-size: 16px !important;
+  line-height: 1;
 }
 
 .btn-small {
