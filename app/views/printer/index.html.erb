@@ -1,0 +1,263 @@
+<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.7/quill.js"></script>
+
+<div class="container">
+  <h1>Thermal Printer</h1>
+
+  <div id="printer-status" class="status <%= @connected ? 'connected' : 'disconnected' %>">
+    <span class="indicator"></span>
+    <span class="status-text">
+      <%= @connected ? "Printer connected" : "Printer not found" %>
+    </span>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <div id="editor"></div>
+
+  <div class="actions">
+    <button type="button" class="btn btn-secondary" onclick="submitPrint('print')">Print</button>
+    <button type="button" class="btn btn-primary" onclick="submitPrint('print_and_cut')">Print & Cut</button>
+  </div>
+
+  <button type="button" class="btn btn-secondary" onclick="submitCut()">Cut Paper</button>
+</div>
+
+<style>
+  .container {
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 20px;
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+
+  h1 {
+    margin-bottom: 20px;
+  }
+
+  .status {
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+  }
+
+  .status.connected {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  .status.disconnected {
+    background: #f8d7da;
+    color: #721c24;
+  }
+
+  .toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    border-radius: 5px;
+    color: white;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  .toast.show {
+    opacity: 1;
+  }
+
+  .toast.success {
+    background: #28a745;
+  }
+
+  .toast.error {
+    background: #dc3545;
+  }
+
+  #editor {
+    height: 200px;
+    margin-bottom: 15px;
+    background: white;
+  }
+
+  .ql-toolbar.ql-snow {
+    border-radius: 5px 5px 0 0;
+  }
+
+  .ql-container.ql-snow {
+    border-radius: 0 0 5px 5px;
+    font-size: 14px;
+  }
+
+  .ql-editor [style*="background-color: rgb(0, 0, 0)"] {
+    color: white !important;
+  }
+
+  .ql-invert {
+    font-size: 11px !important;
+    font-weight: bold;
+    width: auto !important;
+    padding: 0 4px !important;
+  }
+
+  .actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 14px;
+  }
+
+  .btn-primary {
+    background: #007bff;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #0056b3;
+  }
+
+  .btn-secondary {
+    background: #6c757d;
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background: #545b62;
+  }
+
+  .indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+    animation: pulse 2s infinite;
+  }
+
+  .connected .indicator {
+    background: #28a745;
+  }
+
+  .disconnected .indicator {
+    background: #dc3545;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+</style>
+
+<script>
+  var quill = new Quill('#editor', {
+    theme: 'snow',
+    modules: {
+      toolbar: {
+        container: [
+          ['bold', 'italic', 'underline', 'invert'],
+          [{ 'header': [1, 2, 3, false] }],
+          [{ 'align': ['', 'center', 'right'] }]
+        ],
+        handlers: {
+          'invert': function() {
+            var range = this.quill.getSelection();
+            if (!range) return;
+            var format = this.quill.getFormat(range);
+            if (format.background) {
+              this.quill.format('background', false);
+            } else {
+              this.quill.format('background', '#000000');
+            }
+          }
+        }
+      }
+    }
+  });
+
+  // Label the custom invert button
+  var invertBtn = document.querySelector('.ql-invert');
+  invertBtn.innerHTML = 'INV';
+  invertBtn.title = 'Invert (highlight)';
+
+  function showToast(message, type) {
+    var toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = 'toast ' + type + ' show';
+    setTimeout(function() { toast.className = 'toast'; }, 1000);
+  }
+
+  function submitPrint(commit) {
+    var html = quill.root.innerHTML;
+    var token = document.querySelector('meta[name="csrf-token"]').content;
+
+    fetch('<%= print_path %>', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': token },
+      body: JSON.stringify({ html: html, commit: commit })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.error) {
+        showToast(data.error, 'error');
+      } else {
+        showToast(data.message, 'success');
+      }
+    })
+    .catch(function() { showToast('Request failed', 'error'); });
+  }
+
+  function submitCut() {
+    var token = document.querySelector('meta[name="csrf-token"]').content;
+
+    fetch('<%= cut_path %>', {
+      method: 'POST',
+      headers: { 'X-CSRF-Token': token }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.error) {
+        showToast(data.error, 'error');
+      } else {
+        showToast(data.message, 'success');
+      }
+    })
+    .catch(function() { showToast('Request failed', 'error'); });
+  }
+
+  function checkStatus() {
+    fetch('/status')
+      .then(response => response.json())
+      .then(data => {
+        const statusEl = document.getElementById('printer-status');
+        const textEl = statusEl.querySelector('.status-text');
+
+        if (data.connected) {
+          statusEl.className = 'status connected';
+          textEl.textContent = 'Printer connected';
+        } else {
+          statusEl.className = 'status disconnected';
+          textEl.textContent = 'Printer not found';
+        }
+      })
+      .catch(() => {
+        const statusEl = document.getElementById('printer-status');
+        const textEl = statusEl.querySelector('.status-text');
+        statusEl.className = 'status disconnected';
+        textEl.textContent = 'Unable to check status';
+      });
+  }
+
+  setInterval(checkStatus, 5000);
+</script>
