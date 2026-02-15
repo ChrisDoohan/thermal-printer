@@ -1,16 +1,16 @@
 // === Image Editor for Thermal Printer ===
 
 (function() {
-  var PRINTER_WIDTH = 512;
+  var PRINTER_WIDTH = 560;
 
   // --- State ---
   var originalDataUrl = null;  // Original loaded image (for re-crop)
   var cropperInstance = null;
-  var grayscaleBase = null;    // Float32Array, grayscale at 512px wide
+  var grayscaleBase = null;    // Float32Array, grayscale at 560px wide
   var baseWidth = 0;
   var baseHeight = 0;
   var rotation = 0;
-  var orientation = 'portrait';  // 'portrait' = width→512, 'landscape' = height→512
+  var orientation = 'portrait';  // 'portrait' = width→560, 'landscape' = height→560
   var invertOn = false;
   var ditherMode = 'floyd-steinberg';
 
@@ -179,9 +179,9 @@
     cropSection.style.display = 'none';
     processSection.style.display = 'block';
 
-    // Lock the CSS display size based on portrait scaling (width=512)
+    // Lock the CSS display size based on portrait scaling
     // This stays constant regardless of orientation changes
-    var displayWidth = Math.min(PRINTER_WIDTH, 512);
+    var displayWidth = PRINTER_WIDTH;
     var aspect = sourceCanvas.height / sourceCanvas.width;
     var displayHeight = Math.round(displayWidth * aspect);
     previewCanvas.style.width = displayWidth + 'px';
@@ -196,12 +196,12 @@
 
     var w, h;
     if (orientation === 'portrait') {
-      // Width = paper width (512px), always
+      // Width = paper width (560px), always
       var scale = PRINTER_WIDTH / rotated.width;
       w = PRINTER_WIDTH;
       h = Math.round(rotated.height * scale);
     } else {
-      // Landscape: height = paper width (512px), always
+      // Landscape: height = paper width (560px), always
       var scale = PRINTER_WIDTH / rotated.height;
       h = PRINTER_WIDTH;
       w = Math.round(rotated.width * scale);
