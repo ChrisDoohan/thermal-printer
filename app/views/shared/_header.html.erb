@@ -1,0 +1,8 @@
+<h1>Thermal Printer</h1>
+
+<div id="toast" class="toast"></div>
+
+<nav class="page-nav">
+  <a href="<%= root_path %>" class="btn btn-small <%= 'active' if current_page?(root_path) %>">Text</a>
+  <a href="<%= image_editor_path %>" class="btn btn-small <%= 'active' if current_page?(image_editor_path) %>">Image</a>
+</nav>

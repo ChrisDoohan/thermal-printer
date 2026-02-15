@@ -1,3 +1,8 @@
+// Guard against Turbo re-initialization
+if (document.querySelector('.ql-toolbar')) {
+  var quill = document.querySelector('#editor').__quill;
+} else {
+
 var quill = new Quill('#editor', {
   theme: 'snow',
   modules: {
@@ -27,6 +32,8 @@ var quill = new Quill('#editor', {
 var invertBtn = document.querySelector('.ql-invert');
 invertBtn.innerHTML = 'INV';
 invertBtn.title = 'Invert (highlight)';
+
+} // end Turbo guard
 
 function showToast(message, type) {
   var toast = document.getElementById('toast');
