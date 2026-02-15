@@ -194,6 +194,15 @@
     sourceCanvas = inputCanvas;
     cropSection.style.display = 'none';
     processSection.style.display = 'block';
+
+    // Lock the CSS display size based on portrait scaling (width=512)
+    // This stays constant regardless of orientation changes
+    var displayWidth = Math.min(PRINTER_WIDTH, 512);
+    var aspect = sourceCanvas.height / sourceCanvas.width;
+    var displayHeight = Math.round(displayWidth * aspect);
+    previewCanvas.style.width = displayWidth + 'px';
+    previewCanvas.style.height = displayHeight + 'px';
+
     rebuildGrayscale();
     runPipeline();
   }
@@ -203,25 +212,15 @@
 
     var w, h;
     if (orientation === 'portrait') {
-      // Width maps to paper width (512px)
-      if (rotated.width > PRINTER_WIDTH) {
-        var scale = PRINTER_WIDTH / rotated.width;
-        w = PRINTER_WIDTH;
-        h = Math.round(rotated.height * scale);
-      } else {
-        w = rotated.width;
-        h = rotated.height;
-      }
+      // Width = paper width (512px), always
+      var scale = PRINTER_WIDTH / rotated.width;
+      w = PRINTER_WIDTH;
+      h = Math.round(rotated.height * scale);
     } else {
-      // Landscape: height maps to paper width (512px)
-      if (rotated.height > PRINTER_WIDTH) {
-        var scale = PRINTER_WIDTH / rotated.height;
-        h = PRINTER_WIDTH;
-        w = Math.round(rotated.width * scale);
-      } else {
-        w = rotated.width;
-        h = rotated.height;
-      }
+      // Landscape: height = paper width (512px), always
+      var scale = PRINTER_WIDTH / rotated.height;
+      h = PRINTER_WIDTH;
+      w = Math.round(rotated.width * scale);
     }
 
     // Pad dimensions to multiples of 8
