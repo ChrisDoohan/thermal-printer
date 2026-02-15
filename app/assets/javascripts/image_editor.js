@@ -290,21 +290,25 @@
       }
     }
 
-    // 4. Highlights (affect bright pixels, weight = (pixel/255)^2)
+    // 4. Highlights (affect bright pixels via smoothstep 0.25..1.0)
     var highlights = parseInt(highlightsSlider.value);
     if (highlights !== 0) {
       for (var i = 0; i < pixels.length; i++) {
         var t = Math.max(0, Math.min(255, pixels[i])) / 255;
-        pixels[i] = pixels[i] + highlights * t * t;
+        var sx = Math.max(0, Math.min(1, (t - 0.25) / 0.75));  // remap 0.25..1.0 → 0..1
+        var sw = sx * sx * (3 - 2 * sx);  // smoothstep
+        pixels[i] = pixels[i] + highlights * sw;
       }
     }
 
-    // 5. Shadows (affect dark pixels, weight = (1 - pixel/255)^2)
+    // 5. Shadows (affect dark pixels via 1 - smoothstep 0.0..0.75)
     var shadows = parseInt(shadowsSlider.value);
     if (shadows !== 0) {
       for (var i = 0; i < pixels.length; i++) {
-        var t = 1 - Math.max(0, Math.min(255, pixels[i])) / 255;
-        pixels[i] = pixels[i] + shadows * t * t;
+        var t = Math.max(0, Math.min(255, pixels[i])) / 255;
+        var sx = Math.max(0, Math.min(1, t / 0.75));  // remap 0.0..0.75 → 0..1
+        var sw = 1 - sx * sx * (3 - 2 * sx);  // 1 - smoothstep
+        pixels[i] = pixels[i] + shadows * sw;
       }
     }
 
