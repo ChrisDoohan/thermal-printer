@@ -43,6 +43,21 @@ RSpec.describe Printer do
       printer.send_text("\u{1F600}")
       expect(content_after_init).to eq("?".b)
     end
+
+    it "replaces common vulgar fractions with ASCII" do
+      printer.send_text("½ cup ¼ tsp ¾ lb")
+      expect(content_after_init).to eq("1/2 cup 1/4 tsp 3/4 lb".b)
+    end
+
+    it "replaces uncommon vulgar fractions with ASCII" do
+      printer.send_text("⅓ and ⅔ and ⅛")
+      expect(content_after_init).to eq("1/3 and 2/3 and 1/8".b)
+    end
+
+    it "replaces fraction slash with ASCII slash" do
+      printer.send_text("1⁄2")
+      expect(content_after_init).to eq("1/2".b)
+    end
   end
 
   describe "#send_line" do

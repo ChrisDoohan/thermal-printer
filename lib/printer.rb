@@ -20,7 +20,7 @@ class Printer
   end
 
   def send_text(text)
-    @buffer << text.encode("CP1252", undef: :replace, replace: "?")
+    @buffer << sanitize_unicode(text).encode("CP1252", undef: :replace, replace: "?")
   end
 
   def send_line(line)
@@ -67,6 +67,36 @@ class Printer
   private
 
   HEADING_SIZES = { "h1" => 4, "h2" => 3, "h3" => 2 }.freeze
+
+  VULGAR_FRACTIONS = {
+    "\u00BC" => "1/4",   # ¼
+    "\u00BD" => "1/2",   # ½
+    "\u00BE" => "3/4",   # ¾
+    "\u2150" => "1/7",   # ⅐
+    "\u2151" => "1/9",   # ⅑
+    "\u2152" => "1/10",  # ⅒
+    "\u2153" => "1/3",   # ⅓
+    "\u2154" => "2/3",   # ⅔
+    "\u2155" => "1/5",   # ⅕
+    "\u2156" => "2/5",   # ⅖
+    "\u2157" => "3/5",   # ⅗
+    "\u2158" => "4/5",   # ⅘
+    "\u2159" => "1/6",   # ⅙
+    "\u215A" => "5/6",   # ⅚
+    "\u215B" => "1/8",   # ⅛
+    "\u215C" => "3/8",   # ⅜
+    "\u215D" => "5/8",   # ⅝
+    "\u215E" => "7/8",   # ⅞
+    "\u215F" => "1/",    # ⅟ (fraction numerator one)
+    "\u2189" => "0/3",   # ↉
+    "\u2044" => "/",     # ⁄ (fraction slash)
+  }.freeze
+
+  VULGAR_FRACTIONS_RE = Regexp.union(VULGAR_FRACTIONS.keys)
+
+  def sanitize_unicode(text)
+    text.gsub(VULGAR_FRACTIONS_RE, VULGAR_FRACTIONS)
+  end
 
   def walk(node)
     node.children.each do |child|
