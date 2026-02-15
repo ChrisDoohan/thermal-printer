@@ -1,0 +1,166 @@
+/* === Image Editor === */
+
+.image-editor-container {
+  max-width: 600px;
+}
+
+.image-editor-container > h1 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 22px;
+  text-align: center;
+  margin-bottom: 24px;
+  background: linear-gradient(90deg, #ff0000, #ff8800, #ffdd00, #00cc44, #0088ff, #8800ff, #ff0088);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: rainbow-scroll 4s linear infinite;
+}
+
+/* === Drop Zone === */
+
+.drop-zone {
+  border: 2px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 60px 20px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.drop-zone:hover,
+.drop-zone.drag-over {
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.drop-zone p {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+}
+
+.file-label {
+  cursor: pointer;
+  display: inline-block;
+}
+
+/* === Crop === */
+
+.crop-container {
+  max-height: 400px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.crop-container img {
+  max-width: 100%;
+  display: block;
+}
+
+/* === Preview === */
+
+.preview-area {
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+#preview-canvas {
+  width: 100%;
+  max-width: 512px;
+  image-rendering: pixelated;
+  border-radius: 4px;
+}
+
+/* === Controls === */
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.control-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.control-row label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+.control-row label span {
+  color: rgba(255, 255, 255, 0.4);
+  margin-left: 4px;
+}
+
+.control-row input[type="range"] {
+  flex: 1;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+  outline: none;
+}
+
+.control-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+}
+
+.control-row input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  border: none;
+}
+
+.rotation-buttons,
+.mode-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.btn-small {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.btn-small.active {
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
+}
+
+#btn-invert {
+  margin-left: auto;
+}
+
+#btn-invert.active {
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
+}
+
+/* === Editor Sections === */
+
+.editor-section {
+  animation: fade-in 0.2s ease-out;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

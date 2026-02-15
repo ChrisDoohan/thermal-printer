@@ -42,6 +42,8 @@ gem "image_processing", "~> 1.2"
 
 # ESC/POS thermal printer support
 gem "escpos"
+gem "escpos-image"
+gem "chunky_png"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

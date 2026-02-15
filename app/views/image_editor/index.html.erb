@@ -1,0 +1,83 @@
+<% content_for :head do %>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<% end %>
+
+<div id="editor-config" data-print-url="<%= image_editor_print_path %>"></div>
+<div id="starfield"></div>
+
+<div class="container image-editor-container">
+  <h1>Image Editor</h1>
+
+  <div id="toast" class="toast"></div>
+
+  <!-- Drop zone -->
+  <div id="drop-zone" class="drop-zone">
+    <p>Drop an image here, paste from clipboard, or</p>
+    <label class="btn file-label">
+      Choose File
+      <input type="file" id="file-input" accept="image/*" hidden>
+    </label>
+  </div>
+
+  <!-- Crop section -->
+  <div id="crop-section" class="editor-section" style="display:none;">
+    <div class="crop-container">
+      <img id="crop-image">
+    </div>
+    <div class="actions">
+      <button class="btn" id="btn-crop-cancel">New Image</button>
+      <button class="btn" id="btn-crop-skip">Skip Crop</button>
+      <button class="btn btn-primary" id="btn-crop-apply">Apply Crop</button>
+    </div>
+  </div>
+
+  <!-- Processing section -->
+  <div id="process-section" class="editor-section" style="display:none;">
+    <div class="preview-area">
+      <canvas id="preview-canvas"></canvas>
+    </div>
+
+    <div class="controls">
+      <div class="control-row">
+        <label>Rotation</label>
+        <div class="rotation-buttons">
+          <button class="btn btn-small rotation-btn active" data-rotation="0">0&deg;</button>
+          <button class="btn btn-small rotation-btn" data-rotation="90">90&deg;</button>
+          <button class="btn btn-small rotation-btn" data-rotation="180">180&deg;</button>
+          <button class="btn btn-small rotation-btn" data-rotation="270">270&deg;</button>
+        </div>
+        <button class="btn btn-small" id="btn-invert">Invert</button>
+      </div>
+
+      <div class="control-row">
+        <label>Contrast <span id="contrast-val">0</span></label>
+        <input type="range" id="contrast" min="-100" max="100" value="0">
+      </div>
+
+      <div class="control-row">
+        <label>White Point <span id="whitepoint-val">0</span></label>
+        <input type="range" id="whitepoint" min="-100" max="100" value="0">
+      </div>
+
+      <div class="control-row">
+        <label>Mode</label>
+        <div class="mode-buttons">
+          <button class="btn btn-small mode-btn" data-mode="threshold">Threshold</button>
+          <button class="btn btn-small mode-btn active" data-mode="floyd-steinberg">Floyd-Steinberg</button>
+          <button class="btn btn-small mode-btn" data-mode="atkinson">Atkinson</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="btn-back">New Image</button>
+      <button class="btn" id="btn-recrop">Re-crop</button>
+      <button class="btn" id="btn-print">Print</button>
+      <button class="btn btn-primary" id="btn-print-cut">Print & Cut</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+<%= javascript_include_tag "image_editor" %>

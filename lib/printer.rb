@@ -15,6 +15,10 @@ class Printer
     File.exist?(DEVICE_PATH) && File.writable?(DEVICE_PATH)
   end
 
+  def send_raw(bytes)
+    @buffer << bytes.force_encoding("ASCII-8BIT")
+  end
+
   def send_text(text)
     @buffer << text.encode("CP1252", undef: :replace, replace: "?")
   end
@@ -50,7 +54,7 @@ class Printer
 
   def cut
     @buffer << "\n\n\n\n\n"
-    @buffer << Escpos::Helpers.partial_cut
+    @buffer << "\x1B\x69" # ESC i - partial cut
     flush
   end
 
