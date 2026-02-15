@@ -21,10 +21,16 @@
   var cropImage = document.getElementById('crop-image');
   var processSection = document.getElementById('process-section');
   var previewCanvas = document.getElementById('preview-canvas');
+  var exposureSlider = document.getElementById('exposure');
+  var brightnessSlider = document.getElementById('brightness');
   var contrastSlider = document.getElementById('contrast');
-  var whitepointSlider = document.getElementById('whitepoint');
+  var highlightsSlider = document.getElementById('highlights');
+  var shadowsSlider = document.getElementById('shadows');
+  var exposureVal = document.getElementById('exposure-val');
+  var brightnessVal = document.getElementById('brightness-val');
   var contrastVal = document.getElementById('contrast-val');
-  var whitepointVal = document.getElementById('whitepoint-val');
+  var highlightsVal = document.getElementById('highlights-val');
+  var shadowsVal = document.getElementById('shadows-val');
   var invertBtn = document.getElementById('btn-invert');
 
   // =========================================================
@@ -130,10 +136,16 @@
   }
 
   function resetControls() {
+    exposureSlider.value = 0;
+    brightnessSlider.value = 0;
     contrastSlider.value = 0;
-    whitepointSlider.value = 0;
+    highlightsSlider.value = 0;
+    shadowsSlider.value = 0;
+    exposureVal.textContent = '0';
+    brightnessVal.textContent = '0';
     contrastVal.textContent = '0';
-    whitepointVal.textContent = '0';
+    highlightsVal.textContent = '0';
+    shadowsVal.textContent = '0';
     rotation = 0;
     orientation = 'portrait';
     invertOn = false;
@@ -251,7 +263,25 @@
     var h = baseHeight;
     var pixels = new Float32Array(grayscaleBase);
 
-    // 1. Contrast
+    // 1. Exposure (multiplicative, maps -100..100 to ~0.25x..4x via 2^ev)
+    var exposure = parseInt(exposureSlider.value);
+    if (exposure !== 0) {
+      var ev = exposure / 50;  // -2..+2 stops
+      var multiplier = Math.pow(2, ev);
+      for (var i = 0; i < pixels.length; i++) {
+        pixels[i] = pixels[i] * multiplier;
+      }
+    }
+
+    // 2. Brightness (additive offset)
+    var brightness = parseInt(brightnessSlider.value);
+    if (brightness !== 0) {
+      for (var i = 0; i < pixels.length; i++) {
+        pixels[i] = pixels[i] + brightness;
+      }
+    }
+
+    // 3. Contrast (pivot around 128)
     var contrast = parseInt(contrastSlider.value);
     if (contrast !== 0) {
       var factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
@@ -260,15 +290,25 @@
       }
     }
 
-    // 2. White point offset
-    var wp = parseInt(whitepointSlider.value);
-    if (wp !== 0) {
+    // 4. Highlights (affect bright pixels, weight = (pixel/255)^2)
+    var highlights = parseInt(highlightsSlider.value);
+    if (highlights !== 0) {
       for (var i = 0; i < pixels.length; i++) {
-        pixels[i] = pixels[i] + wp;
+        var t = Math.max(0, Math.min(255, pixels[i])) / 255;
+        pixels[i] = pixels[i] + highlights * t * t;
       }
     }
 
-    // 3. Clamp to 0-255
+    // 5. Shadows (affect dark pixels, weight = (1 - pixel/255)^2)
+    var shadows = parseInt(shadowsSlider.value);
+    if (shadows !== 0) {
+      for (var i = 0; i < pixels.length; i++) {
+        var t = 1 - Math.max(0, Math.min(255, pixels[i])) / 255;
+        pixels[i] = pixels[i] + shadows * t * t;
+      }
+    }
+
+    // 6. Clamp to 0-255
     for (var i = 0; i < pixels.length; i++) {
       if (pixels[i] < 0) pixels[i] = 0;
       else if (pixels[i] > 255) pixels[i] = 255;
@@ -399,14 +439,17 @@
   // =========================================================
 
   // Sliders — real-time update on input
-  contrastSlider.addEventListener('input', function() {
-    contrastVal.textContent = this.value;
-    runPipeline();
-  });
-
-  whitepointSlider.addEventListener('input', function() {
-    whitepointVal.textContent = this.value;
-    runPipeline();
+  [
+    [exposureSlider, exposureVal],
+    [brightnessSlider, brightnessVal],
+    [contrastSlider, contrastVal],
+    [highlightsSlider, highlightsVal],
+    [shadowsSlider, shadowsVal]
+  ].forEach(function(pair) {
+    pair[0].addEventListener('input', function() {
+      pair[1].textContent = this.value;
+      runPipeline();
+    });
   });
 
   // Orientation buttons
