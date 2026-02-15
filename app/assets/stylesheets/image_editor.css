@@ -51,13 +51,12 @@
 .crop-container {
   max-height: 400px;
   margin-bottom: 15px;
-  border-radius: 8px;
-  overflow: hidden;
 }
 
 .crop-container img {
   max-width: 100%;
   display: block;
+  border-radius: 8px;
 }
 
 /* === Preview === */
