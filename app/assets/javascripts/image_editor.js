@@ -118,22 +118,6 @@
     enterProcessing(croppedCanvas);
   });
 
-  document.getElementById('btn-crop-skip').addEventListener('click', function() {
-    if (cropperInstance) {
-      cropperInstance.destroy();
-      cropperInstance = null;
-    }
-    var img = new Image();
-    img.onload = function() {
-      var c = document.createElement('canvas');
-      c.width = img.naturalWidth;
-      c.height = img.naturalHeight;
-      c.getContext('2d').drawImage(img, 0, 0);
-      enterProcessing(c);
-    };
-    img.src = originalDataUrl;
-  });
-
   document.getElementById('btn-crop-cancel').addEventListener('click', function() {
     resetToDropZone();
   });
