@@ -1,0 +1,270 @@
+/* === Base === */
+
+body {
+  background: #0b0b2a;
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+/* === Starfield === */
+
+#starfield {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.star {
+  position: absolute;
+  background: white;
+  border-radius: 0;
+  animation: twinkle var(--duration) var(--delay) infinite ease-in-out;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 1; }
+}
+
+/* === Layout === */
+
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.container > h1 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 22px;
+  text-align: center;
+  margin-bottom: 24px;
+  background: linear-gradient(90deg, #ff0000, #ff8800, #ffdd00, #00cc44, #0088ff, #8800ff, #ff0088);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: rainbow-scroll 4s linear infinite;
+}
+
+@keyframes rainbow-scroll {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* === Status indicator === */
+
+.status {
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.status.connected {
+  background: rgba(40, 167, 69, 0.15);
+  color: #6fdc8c;
+}
+
+.status.disconnected {
+  background: rgba(220, 53, 69, 0.15);
+  color: #ff8a8a;
+}
+
+.indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 0;
+  margin-right: 8px;
+  animation: pulse 2s infinite;
+}
+
+.connected .indicator {
+  background: #6fdc8c;
+  box-shadow: 0 0 6px #6fdc8c;
+}
+
+.disconnected .indicator {
+  background: #ff8a8a;
+  box-shadow: 0 0 6px #ff8a8a;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* === Toast === */
+
+.toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  border-radius: 8px;
+  color: white;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.toast.show { opacity: 1; }
+.toast.success { background: rgba(40, 167, 69, 0.9); }
+.toast.error { background: rgba(220, 53, 69, 0.9); }
+
+/* === Editor === */
+
+.editor-wrap {
+  border-radius: 8px;
+  padding: 2px;
+  background: linear-gradient(135deg, #ff0000, #ff8800, #ffdd00, #00cc44, #0088ff, #8800ff, #ff0088);
+  background-size: 300% 300%;
+  animation: rainbow-border 6s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes rainbow-border {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+#editor {
+  background: #1a1a3a;
+}
+
+.ql-editor {
+  min-height: 200px;
+  max-height: calc(100vh - 280px);
+  overflow-y: auto;
+}
+
+/* === Quill dark theme overrides === */
+
+.ql-toolbar.ql-snow {
+  border-radius: 6px 6px 0 0;
+  border: none;
+  background: #14142e;
+}
+
+.ql-toolbar.ql-snow .ql-stroke {
+  stroke: rgba(255, 255, 255, 0.6);
+}
+
+.ql-toolbar.ql-snow .ql-fill {
+  fill: rgba(255, 255, 255, 0.6);
+}
+
+.ql-toolbar.ql-snow .ql-picker-label {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.ql-toolbar.ql-snow button:hover .ql-stroke {
+  stroke: white;
+}
+
+.ql-toolbar.ql-snow button:hover .ql-fill {
+  fill: white;
+}
+
+.ql-container.ql-snow {
+  border-radius: 0 0 6px 6px;
+  border: none;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.ql-editor.ql-blank::before {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.ql-toolbar.ql-snow .ql-picker-options {
+  background: #14142e;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.ql-toolbar.ql-snow .ql-picker-item {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.ql-toolbar.ql-snow .ql-picker-item:hover {
+  color: white;
+}
+
+.ql-toolbar.ql-snow .ql-picker-options .ql-picker-item .ql-stroke {
+  stroke: rgba(255, 255, 255, 0.6);
+}
+
+.ql-toolbar.ql-snow .ql-picker-options .ql-picker-item:hover .ql-stroke {
+  stroke: white;
+}
+
+.ql-editor [style*="background-color: rgb(255, 255, 255)"] {
+  color: #0b0b2a !important;
+}
+
+.ql-invert {
+  font-size: 11px !important;
+  font-weight: bold;
+  width: auto !important;
+  padding: 0 4px !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.ql-invert:hover {
+  color: white !important;
+}
+
+/* === Buttons === */
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.2s;
+}
+
+.btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: white;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #ff0088, #8800ff, #0088ff);
+  background-size: 200% 200%;
+  animation: rainbow-border 4s linear infinite;
+  color: white;
+  border: none;
+  font-weight: bold;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.2);
+}
