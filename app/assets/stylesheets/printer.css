@@ -31,6 +31,19 @@ body {
   50% { opacity: 1; }
 }
 
+/* === Navigation === */
+
+.page-nav {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.page-nav a {
+  text-decoration: none;
+}
+
 /* === Layout === */
 
 .container {
