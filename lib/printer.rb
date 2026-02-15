@@ -116,9 +116,11 @@ class Printer
         when "i", "em"
           uline_on; walk(child); uline_off
         when "h1", "h2", "h3"
-          set_size(HEADING_SIZES[name]); bold_on
-          walk(child)
-          bold_off; reset_size; send_text("\n")
+          apply_alignment(child) do
+            set_size(HEADING_SIZES[name]); bold_on
+            walk(child)
+            bold_off; reset_size; send_text("\n")
+          end
         when "p"
           apply_alignment(child) do
             walk(child)

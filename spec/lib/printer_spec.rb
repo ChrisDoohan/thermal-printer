@@ -178,6 +178,13 @@ RSpec.describe Printer do
       )
     end
 
+    it "renders center-aligned heading" do
+      printer.send_html('<h1 class="ql-align-center">TJ</h1>')
+      expect(content_after_init).to eq(
+        "\x1B\x61\x01\x1D\x21\x33\x1B\x45\x01TJ\x1B\x45\x00\x1D\x21\x00\n\x1B\x61\x00".b
+      )
+    end
+
     it "renders h1 with size 4 and bold" do
       printer.send_html("<h1>Title</h1>")
       expect(content_after_init).to eq(
