@@ -27,21 +27,6 @@
   var whitepointVal = document.getElementById('whitepoint-val');
   var invertBtn = document.getElementById('btn-invert');
 
-  // --- Starfield (same as printer page) ---
-  var starfield = document.getElementById('starfield');
-  for (var i = 0; i < 120; i++) {
-    var star = document.createElement('div');
-    star.className = 'star';
-    var size = Math.random() < 0.85 ? 2 : 3;
-    star.style.width = size + 'px';
-    star.style.height = size + 'px';
-    star.style.left = Math.random() * 100 + '%';
-    star.style.top = Math.random() * 100 + '%';
-    star.style.setProperty('--duration', (1.5 + Math.random() * 3) + 's');
-    star.style.setProperty('--delay', (Math.random() * 4) + 's');
-    starfield.appendChild(star);
-  }
-
   // =========================================================
   // Phase 2: Image Input
   // =========================================================

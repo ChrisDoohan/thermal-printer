@@ -4,19 +4,6 @@
   max-width: 600px;
 }
 
-.image-editor-container > h1 {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 22px;
-  text-align: center;
-  margin-bottom: 24px;
-  background: linear-gradient(90deg, #ff0000, #ff8800, #ffdd00, #00cc44, #0088ff, #8800ff, #ff0088);
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: rainbow-scroll 4s linear infinite;
-}
-
 /* === Drop Zone === */
 
 .drop-zone {

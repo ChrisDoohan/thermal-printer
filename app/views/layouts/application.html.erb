@@ -18,11 +18,72 @@
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+
+    <script type="module">
+      import hotwiredTurbo from "https://cdn.jsdelivr.net/npm/@hotwired/turbo@8.0.12/+esm";
+    </script>
   </head>
 
   <body>
+    <div id="starfield" data-turbo-permanent></div>
     <%= yield %>
+    <div id="printer-status" class="status-footer">
+      <span class="indicator"></span>
+      <span class="status-text">Checking...</span>
+    </div>
+    <script>
+      // Generate starfield once — persists across Turbo navigations
+      (function() {
+        var starfield = document.getElementById('starfield');
+        if (starfield.children.length > 0) return;
+        for (var i = 0; i < 120; i++) {
+          var star = document.createElement('div');
+          star.className = 'star';
+          var size = Math.random() < 0.85 ? 2 : 3;
+          star.style.width = size + 'px';
+          star.style.height = size + 'px';
+          star.style.left = Math.random() * 100 + '%';
+          star.style.top = Math.random() * 100 + '%';
+          star.style.setProperty('--duration', (1.5 + Math.random() * 3) + 's');
+          star.style.setProperty('--delay', (Math.random() * 4) + 's');
+          starfield.appendChild(star);
+        }
+      })();
+
+      // Printer status polling
+      (function() {
+        if (window._statusPolling) return;
+        window._statusPolling = true;
+
+        function checkStatus() {
+          fetch('/status')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+              var el = document.getElementById('printer-status');
+              var text = el.querySelector('.status-text');
+              if (data.connected) {
+                el.className = 'status-footer connected';
+                text.textContent = 'Printer connected';
+              } else {
+                el.className = 'status-footer disconnected';
+                text.textContent = 'Printer not found';
+              }
+            })
+            .catch(function() {
+              var el = document.getElementById('printer-status');
+              var text = el.querySelector('.status-text');
+              el.className = 'status-footer disconnected';
+              text.textContent = 'Unable to check status';
+            });
+        }
+
+        checkStatus();
+        setInterval(checkStatus, 5000);
+      })();
+    </script>
   </body>
 </html>

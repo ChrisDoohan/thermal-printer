@@ -1,20 +1,11 @@
 <% content_for :head do %>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <% end %>
 
 <div id="editor-config" data-print-url="<%= image_editor_print_path %>"></div>
-<div id="starfield"></div>
 
 <div class="container image-editor-container">
-  <nav class="page-nav">
-    <a href="<%= root_path %>" class="btn btn-small">Text</a>
-    <a href="<%= image_editor_path %>" class="btn btn-small active">Image</a>
-  </nav>
-
-  <h1>Image Editor</h1>
-
-  <div id="toast" class="toast"></div>
+  <%= render "shared/header" %>
 
   <!-- Drop zone -->
   <div id="drop-zone" class="drop-zone">

@@ -1,27 +1,11 @@
 <% content_for :head do %>
   <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <% end %>
 
 <div id="printer-config" data-print-url="<%= print_path %>" data-cut-url="<%= cut_path %>"></div>
-<div id="starfield"></div>
 
 <div class="container">
-  <nav class="page-nav">
-    <a href="<%= root_path %>" class="btn btn-small active">Text</a>
-    <a href="<%= image_editor_path %>" class="btn btn-small">Image</a>
-  </nav>
-
-  <h1>Thermal Printer</h1>
-
-  <div id="printer-status" class="status <%= @connected ? 'connected' : 'disconnected' %>">
-    <span class="indicator"></span>
-    <span class="status-text">
-      <%= @connected ? "Printer connected" : "Printer not found" %>
-    </span>
-  </div>
-
-  <div id="toast" class="toast"></div>
+  <%= render "shared/header" %>
 
   <div class="editor-wrap">
     <div id="editor"></div>

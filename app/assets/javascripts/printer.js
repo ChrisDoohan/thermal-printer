@@ -1,20 +1,3 @@
-// Generate twinkling 8-bit stars
-(function() {
-  var starfield = document.getElementById('starfield');
-  for (var i = 0; i < 120; i++) {
-    var star = document.createElement('div');
-    star.className = 'star';
-    var size = Math.random() < 0.85 ? 2 : 3;
-    star.style.width = size + 'px';
-    star.style.height = size + 'px';
-    star.style.left = Math.random() * 100 + '%';
-    star.style.top = Math.random() * 100 + '%';
-    star.style.setProperty('--duration', (1.5 + Math.random() * 3) + 's');
-    star.style.setProperty('--delay', (Math.random() * 4) + 's');
-    starfield.appendChild(star);
-  }
-})();
-
 var quill = new Quill('#editor', {
   theme: 'snow',
   modules: {
@@ -92,27 +75,3 @@ function submitCut() {
   .catch(function() { showToast('Request failed', 'error'); });
 }
 
-function checkStatus() {
-  fetch('/status')
-    .then(function(response) { return response.json(); })
-    .then(function(data) {
-      var statusEl = document.getElementById('printer-status');
-      var textEl = statusEl.querySelector('.status-text');
-
-      if (data.connected) {
-        statusEl.className = 'status connected';
-        textEl.textContent = 'Printer connected';
-      } else {
-        statusEl.className = 'status disconnected';
-        textEl.textContent = 'Printer not found';
-      }
-    })
-    .catch(function() {
-      var statusEl = document.getElementById('printer-status');
-      var textEl = statusEl.querySelector('.status-text');
-      statusEl.className = 'status disconnected';
-      textEl.textContent = 'Unable to check status';
-    });
-}
-
-setInterval(checkStatus, 5000);
