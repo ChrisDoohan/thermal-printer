@@ -10,12 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_16_010914) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_16_013213) do
   create_table "contents", force: :cascade do |t|
     t.text "body"
     t.string "content_hash"
     t.string "content_type"
     t.datetime "created_at", null: false
+    t.text "thumbnail"
     t.datetime "updated_at", null: false
     t.index ["content_hash"], name: "index_contents_on_content_hash", unique: true
   end
