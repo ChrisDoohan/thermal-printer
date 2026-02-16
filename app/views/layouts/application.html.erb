@@ -41,10 +41,13 @@
         if (starfield.children.length > 0) return;
         for (var i = 0; i < 120; i++) {
           var star = document.createElement('div');
-          star.className = 'star';
-          var size = Math.random() < 0.85 ? 2 : 3;
-          star.style.width = size + 'px';
-          star.style.height = size + 'px';
+          var isCross = Math.random() < 0.15;
+          star.className = isCross ? 'star star-cross' : 'star';
+          if (!isCross) {
+            var size = Math.random() < 0.85 ? 2 : 3;
+            star.style.width = size + 'px';
+            star.style.height = size + 'px';
+          }
           star.style.left = Math.random() * 100 + '%';
           star.style.top = Math.random() * 100 + '%';
           star.style.setProperty('--duration', (1.5 + Math.random() * 3) + 's');
