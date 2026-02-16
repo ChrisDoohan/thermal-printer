@@ -16,6 +16,7 @@ Rails.application.routes.draw do
   post "cut", to: "printer#cut"
   get "status", to: "printer#status"
   get "prints", to: "printer#prints"
+  post "reprint", to: "printer#reprint"
 
   get "image_editor", to: "image_editor#index"
   post "image_editor/print", to: "image_editor#print"

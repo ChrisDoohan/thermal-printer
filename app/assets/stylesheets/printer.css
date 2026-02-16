@@ -503,6 +503,15 @@ body {
   opacity: 1;
 }
 
+.history-body {
+  margin-bottom: 10px;
+}
+
+.history-reprint {
+  font-size: 11px;
+  padding: 5px 14px;
+}
+
 .history-empty {
   text-align: center;
   color: rgba(255, 255, 255, 0.25);

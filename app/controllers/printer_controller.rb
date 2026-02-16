@@ -43,6 +43,38 @@ class PrinterController < ApplicationController
     render json: { error: e.message }, status: :service_unavailable
   end
 
+  def reprint
+    content = Content.find(params[:id])
+    username = params[:username] || "anonymous"
+    print_record = content.prints.create!(username: username)
+
+    printer = Printer.new
+    if content.content_type == "text"
+      printer.send_html(content.body)
+    else
+      png_bytes = Base64.decode64(content.body)
+      tempfile = Tempfile.new(["reprint", ".png"])
+      tempfile.binmode
+      tempfile.write(png_bytes)
+      tempfile.rewind
+      require "escpos/image"
+      image = Escpos::Image.new(tempfile.path, processor: "ChunkyPng")
+      printer.send_raw(image.to_escpos)
+      tempfile.close!
+    end
+    printer.cut
+
+    render json: {
+      message: "Reprinted!",
+      entry: serialize_entry(content, print_record)
+    }
+  rescue Printer::NotAvailable => e
+    render json: {
+      error: e.message,
+      entry: serialize_entry(content, print_record)
+    }, status: :service_unavailable
+  end
+
   def prints
     entries = Content
       .joins(:prints)

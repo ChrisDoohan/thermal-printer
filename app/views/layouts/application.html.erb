@@ -130,8 +130,19 @@
         var expanded = document.createElement('div');
         expanded.className = 'history-expanded';
         if (entry.content_type === 'text' && entry.body) {
-          expanded.innerHTML = entry.body;
+          var bodyDiv = document.createElement('div');
+          bodyDiv.className = 'history-body';
+          bodyDiv.innerHTML = entry.body;
+          expanded.appendChild(bodyDiv);
         }
+        var reprintBtn = document.createElement('button');
+        reprintBtn.className = 'btn btn-small history-reprint';
+        reprintBtn.textContent = 'Reprint';
+        reprintBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          reprintContent(entry.id);
+        });
+        expanded.appendChild(reprintBtn);
         el.appendChild(expanded);
 
         el.addEventListener('click', function() {
@@ -150,6 +161,25 @@
         list.insertBefore(el, list.firstChild);
         var empty = list.querySelector('.history-empty');
         if (empty) empty.remove();
+      }
+
+      function reprintContent(contentId) {
+        var token = document.querySelector('meta[name="csrf-token"]').content;
+        fetch('/reprint', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': token },
+          body: JSON.stringify({ id: contentId, username: localStorage.getItem('username') || 'anonymous' })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.entry) prependHistoryEntry(data.entry);
+          if (data.error) {
+            showToast(data.error, 'error');
+          } else {
+            showToast(data.message, 'success');
+          }
+        })
+        .catch(function() { showToast('Request failed', 'error'); });
       }
 
       function loadHistory() {
