@@ -66,12 +66,11 @@ RSpec.describe Content, type: :model do
         expect(thumb.height).to be > 120
       end
 
-      it "rotates landscape images and scales to 120px wide" do
+      it "scales landscape thumbnails so height is 120px" do
         content = Content.find_or_create_by_body(landscape_image, "image")
         thumb = ChunkyPNG::Image.from_blob(Base64.decode64(content.thumbnail))
-        # Landscape 800x560 rotated CW becomes 560x800 (portrait), then scaled
-        expect(thumb.width).to eq(120)
-        expect(thumb.height).to be > 120
+        expect(thumb.height).to eq(120)
+        expect(thumb.width).to be > 120
       end
 
       it "handles square images" do

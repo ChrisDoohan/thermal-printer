@@ -366,3 +366,158 @@ body {
 .btn-primary:hover {
   filter: brightness(1.2);
 }
+
+/* === Print History === */
+
+.history-section {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.history-header h2 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+}
+
+.history-search {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 12px;
+  padding: 5px 10px;
+  width: 160px;
+  outline: none;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.history-search:focus {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.history-search::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.history-entry {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.history-entry:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.history-entry.open {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.history-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.history-user {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.history-time {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.3);
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.history-preview {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.4;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.history-thumbnail {
+  max-height: 80px;
+  image-rendering: pixelated;
+  opacity: 0.7;
+}
+
+.history-expanded {
+  display: none;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.5;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.history-entry.open .history-preview {
+  white-space: normal;
+}
+
+.history-entry.open .history-expanded {
+  display: block;
+}
+
+.history-entry.open .history-thumbnail {
+  max-height: none;
+  opacity: 1;
+}
+
+.history-empty {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 12px;
+  padding: 20px;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Scrollbar styling for history */
+.history-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.history-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.history-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+}
+
+.history-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}

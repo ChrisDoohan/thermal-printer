@@ -29,7 +29,8 @@ class ImageEditorController < ApplicationController
     tempfile.close!
 
     content = Content.find_or_create_by_body(raw_base64, "image")
-    content.prints.create!(username: params[:username] || "anonymous")
+    username = params[:username] || "anonymous"
+    print_record = content.prints.create!(username: username)
 
     # Send to printer
     printer = Printer.new
@@ -41,7 +42,18 @@ class ImageEditorController < ApplicationController
       printer.flush
     end
 
-    render json: { message: "Image printed!" }
+    render json: {
+      message: "Image printed!",
+      entry: {
+        id: content.id,
+        content_type: "image",
+        preview: nil,
+        thumbnail: content.thumbnail,
+        username: username,
+        printed_at: print_record.created_at,
+        body: nil
+      }
+    }
   rescue Printer::NotAvailable => e
     render json: { error: e.message }, status: :service_unavailable
   end
