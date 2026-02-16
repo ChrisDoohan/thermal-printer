@@ -534,7 +534,10 @@
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (data.error) showToast(data.error, 'error');
-      else showToast(data.message, 'success');
+      else {
+        showToast(data.message, 'success');
+        if (data.entry) prependHistoryEntry(data.entry);
+      }
     })
     .catch(function() { showToast('Request failed', 'error'); });
   }
