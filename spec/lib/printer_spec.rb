@@ -232,6 +232,16 @@ RSpec.describe Printer do
       )
     end
 
+    it "renders unordered list with bullets and newlines" do
+      printer.send_html("<ul><li>eggs</li><li>milk</li><li>butter</li></ul>")
+      expect(content_after_init).to eq("- eggs\n- milk\n- butter\n".b)
+    end
+
+    it "renders ordered list with numbers" do
+      printer.send_html("<ol><li>first</li><li>second</li><li>third</li></ol>")
+      expect(content_after_init).to eq("1. first\n2. second\n3. third\n".b)
+    end
+
     it "encodes accented characters to CP1252" do
       printer.send_html("<p>Saut\u00E9ed</p>")
       expect(content_after_init.bytes).to eq("Saut\xE9ed\n".b.bytes)

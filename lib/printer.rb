@@ -132,6 +132,15 @@ class Printer
             walk(child)
             send_text("\n")
           end
+        when "li"
+          if child.parent&.name&.downcase == "ol"
+            idx = child.parent.css("li").index(child).to_i + 1
+            send_text("#{idx}. ")
+          else
+            send_text("- ")
+          end
+          walk(child)
+          send_text("\n")
         when "br"
           send_text("\n")
         else
