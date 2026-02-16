@@ -12,6 +12,7 @@ class Printer
   end
 
   def available?
+    return true if ENV["FAKE_PRINTER"]
     File.exist?(DEVICE_PATH) && File.writable?(DEVICE_PATH)
   end
 
@@ -59,6 +60,11 @@ class Printer
   end
 
   def flush
+    if ENV["FAKE_PRINTER"]
+      Rails.logger.info "[FakePrinter] Would send #{@buffer.bytesize} bytes"
+      @buffer = "".b
+      return
+    end
     raise NotAvailable, "Printer not available at #{DEVICE_PATH}" unless available?
     File.open(DEVICE_PATH, "wb") { |f| f.write(@buffer) }
     @buffer = "".b

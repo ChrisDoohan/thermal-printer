@@ -28,6 +28,9 @@ class ImageEditorController < ApplicationController
 
     tempfile.close!
 
+    content = Content.find_or_create_by_body(raw_base64, "image")
+    content.prints.create!(username: params[:username] || "anonymous")
+
     # Send to printer
     printer = Printer.new
     printer.send_raw(escpos_data)

@@ -33,6 +33,16 @@
     <div id="printer-status" class="status-footer">
       <span class="indicator"></span>
       <span class="status-text">Checking...</span>
+      <span class="status-sep">·</span>
+      <span id="username-badge" class="username-badge"></span>
+    </div>
+
+    <div id="username-modal" class="username-modal" style="display:none">
+      <div class="username-modal-box">
+        <h2>Who are you?</h2>
+        <input type="text" id="username-input" placeholder="Your name" maxlength="30" autocomplete="off">
+        <button id="username-save" class="btn btn-primary">Save</button>
+      </div>
     </div>
     <script>
       // Generate starfield once — persists across Turbo navigations
@@ -54,6 +64,46 @@
           star.style.setProperty('--delay', (Math.random() * 4) + 's');
           starfield.appendChild(star);
         }
+      })();
+
+      // Username prompt
+      (function() {
+        var modal = document.getElementById('username-modal');
+        var input = document.getElementById('username-input');
+        var saveBtn = document.getElementById('username-save');
+        var badge = document.getElementById('username-badge');
+
+        function showBadge() {
+          var name = localStorage.getItem('username');
+          if (name) badge.textContent = name;
+        }
+
+        function saveUsername() {
+          var name = input.value.trim();
+          if (!name) return;
+          localStorage.setItem('username', name);
+          modal.style.display = 'none';
+          showBadge();
+        }
+
+        if (!localStorage.getItem('username')) {
+          modal.style.display = 'flex';
+          input.focus();
+        }
+
+        saveBtn.addEventListener('click', saveUsername);
+        input.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') saveUsername();
+        });
+
+        badge.addEventListener('click', function() {
+          input.value = localStorage.getItem('username') || '';
+          modal.style.display = 'flex';
+          input.focus();
+          input.select();
+        });
+
+        showBadge();
       })();
 
       // Printer status polling

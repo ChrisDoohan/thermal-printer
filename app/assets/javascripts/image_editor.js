@@ -529,7 +529,7 @@
     fetch(printUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': token },
-      body: JSON.stringify({ image: dataUrl, cut: cut ? 'true' : 'false' })
+      body: JSON.stringify({ image: dataUrl, cut: cut ? 'true' : 'false', username: localStorage.getItem('username') || 'anonymous' })
     })
     .then(function(r) { return r.json(); })
     .then(function(data) {

@@ -15,6 +15,9 @@ class PrinterController < ApplicationController
       return
     end
 
+    content = Content.find_or_create_by_body(html, "text")
+    content.prints.create!(username: params[:username] || "anonymous")
+
     printer = Printer.new
     printer.send_html(html)
 

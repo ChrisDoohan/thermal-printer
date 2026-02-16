@@ -50,7 +50,7 @@ function submitPrint(commit) {
   fetch(printUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': token },
-    body: JSON.stringify({ html: html, commit: commit })
+    body: JSON.stringify({ html: html, commit: commit, username: localStorage.getItem('username') || 'anonymous' })
   })
   .then(function(r) { return r.json(); })
   .then(function(data) {
