@@ -6,6 +6,22 @@ class Printer
 
   DEVICE_PATH = "/dev/usb/lp0"
 
+  # Code page numbers follow Epson's standard table, which this printer's
+  # firmware implements. Verified empirically with script/codepage_scan.rb
+  # and script/verify_pages.rb -- see those scripts for how to re-check.
+  #
+  # CP1252 covers Western European plus the smart punctuation Quill emits
+  # (curly quotes, em dash, ellipsis). CP852 covers the full Czech alphabet
+  # but has no £, €, or curly quotes -- hence the per-character switching in
+  # #send_text rather than a single page for the whole document.
+  WEST_PAGE  = 16  # WPC1252
+  LATIN2_PAGE = 18 # PC852
+
+  PAGE_ENCODINGS = {
+    WEST_PAGE => "CP1252",
+    LATIN2_PAGE => "CP852"
+  }.freeze
+
   def initialize
     @buffer = "".b
     init_printer
@@ -21,7 +37,11 @@ class Printer
   end
 
   def send_text(text)
-    @buffer << sanitize_unicode(text).encode("CP1252", undef: :replace, replace: "?")
+    sanitize_unicode(text).each_char do |char|
+      page = page_for(char)
+      select_code_page(page) unless page == @code_page
+      @buffer << char.encode(PAGE_ENCODINGS.fetch(page), undef: :replace, replace: "?").b
+    end
   end
 
   def send_line(line)
@@ -104,6 +124,33 @@ class Printer
     text.gsub(VULGAR_FRACTIONS_RE, VULGAR_FRACTIONS)
   end
 
+  # Stay on the current page for as long as it can render the character, and
+  # only switch when it genuinely cannot. Picking the "best" page per
+  # character instead would make a word like "žluťoučký" flip pages seven
+  # times, since its bare vowels are valid in both pages.
+  def page_for(char)
+    return @code_page if encodable?(char, @code_page)
+    PAGE_ENCODINGS.keys.find { |page| encodable?(char, page) } || @code_page
+  end
+
+  def encodable?(char, page)
+    @encodable ||= {}
+    key = [ char, page ]
+    return @encodable[key] if @encodable.key?(key)
+
+    @encodable[key] = begin
+      char.encode(PAGE_ENCODINGS.fetch(page))
+      true
+    rescue Encoding::UndefinedConversionError
+      false
+    end
+  end
+
+  def select_code_page(page)
+    @buffer << "\x1B\x74" << page.chr
+    @code_page = page
+  end
+
   def walk(node)
     node.children.each do |child|
       case child.type
@@ -168,8 +215,8 @@ class Printer
   end
 
   def init_printer
-    @buffer << "\x1B\x40"     # ESC @ - Initialize printer
-    @buffer << "\x1C\x2E"     # FS .  - Cancel CJK mode
-    @buffer << "\x1B\x74\x06" # ESC t 6 - Set code page to CP1252
+    @buffer << "\x1B\x40" # ESC @ - Initialize printer
+    @buffer << "\x1C\x2E" # FS .  - Cancel CJK mode
+    select_code_page(WEST_PAGE)
   end
 end

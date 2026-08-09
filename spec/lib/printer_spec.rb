@@ -4,7 +4,7 @@ RSpec.describe Printer do
   subject(:printer) { described_class.new }
 
   # Helper to extract the buffer contents after init sequence
-  let(:init_bytes) { "\x1B\x40\x1C\x2E\x1B\x74\x06".b }
+  let(:init_bytes) { "\x1B\x40\x1C\x2E\x1B\x74\x10".b }
 
   def buffer
     printer.instance_variable_get(:@buffer)
@@ -15,7 +15,7 @@ RSpec.describe Printer do
   end
 
   describe "#initialize" do
-    it "sends ESC @, FS ., and ESC t 6" do
+    it "sends ESC @, FS ., and ESC t 16 (CP1252)" do
       expect(buffer).to eq(init_bytes)
     end
   end
@@ -57,6 +57,45 @@ RSpec.describe Printer do
     it "replaces fraction slash with ASCII slash" do
       printer.send_text("1⁄2")
       expect(content_after_init).to eq("1/2".b)
+    end
+
+    it "emits no code page switch for text CP1252 can render" do
+      printer.send_text("Sauteed café for £5.50 “ok” — yes")
+      expect(content_after_init).not_to include("\x1B\x74".b)
+    end
+
+    it "switches to CP852 for Czech characters" do
+      printer.send_text("ř")
+      expect(content_after_init).to eq("\x1B\x74\x12\xFD".b)
+    end
+
+    it "switches back to CP1252 after Czech characters" do
+      printer.send_text("ř £")
+      expect(content_after_init).to eq("\x1B\x74\x12\xFD \x1B\x74\x10\xA3".b)
+    end
+
+    it "stays on CP852 across characters both pages can render" do
+      # Only č ď ě ň ř ť ů are missing from CP1252; the rest of the Czech
+      # alphabet is in both pages. Staying put on the shared characters costs
+      # one switch for "ťoučký" instead of flip-flopping on every letter.
+      printer.send_text("ťoučký")
+      expect(content_after_init).to eq("\x1B\x74\x12\x9Cou\x9Fk\xEC".b)
+    end
+
+    it "does not switch for Czech letters CP1252 already has" do
+      printer.send_text("žluťoučký".delete("ť"))
+      expect(content_after_init.scan("\x1B\x74".b).size).to eq(1)
+    end
+
+    it "keeps the code page across separate send_text calls" do
+      printer.send_text("ř")
+      printer.send_text("ř")
+      expect(content_after_init).to eq("\x1B\x74\x12\xFD\xFD".b)
+    end
+
+    it "replaces characters no code page can render" do
+      printer.send_text("\u{1F600}")
+      expect(content_after_init).to eq("?".b)
     end
   end
 
