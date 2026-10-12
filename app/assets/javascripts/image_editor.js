@@ -31,6 +31,9 @@
   var contrastVal = document.getElementById('contrast-val');
   var highlightsVal = document.getElementById('highlights-val');
   var shadowsVal = document.getElementById('shadows-val');
+  var thresholdSlider = document.getElementById('threshold');
+  var thresholdVal = document.getElementById('threshold-val');
+  var thresholdRow = document.getElementById('threshold-row');
   var invertBtn = document.getElementById('btn-invert');
 
   // =========================================================
@@ -146,6 +149,8 @@
     contrastVal.textContent = '0';
     highlightsVal.textContent = '0';
     shadowsVal.textContent = '0';
+    thresholdSlider.value = 128;
+    thresholdVal.textContent = '128';
     rotation = 0;
     orientation = 'portrait';
     invertOn = false;
@@ -163,6 +168,12 @@
     var modeBtns = document.querySelectorAll('.mode-btn');
     modeBtns.forEach(function(b) { b.classList.remove('active'); });
     document.querySelector('.mode-btn[data-mode="floyd-steinberg"]').classList.add('active');
+    updateThresholdRow();
+  }
+
+  // The threshold slider only means something in threshold mode
+  function updateThresholdRow() {
+    thresholdRow.style.display = ditherMode === 'threshold' ? '' : 'none';
   }
 
   // =========================================================
@@ -290,25 +301,20 @@
       }
     }
 
-    // 4. Highlights (affect bright pixels via smoothstep 0.25..1.0)
-    var highlights = parseInt(highlightsSlider.value);
-    if (highlights !== 0) {
+    // 4. Shadows & highlights (Windows Photos curves, see SHADOW_OFFSET)
+    var shadows = parseInt(shadowsSlider.value) / 100;
+    var highlights = parseInt(highlightsSlider.value) / 100;
+    if (shadows !== 0 || highlights !== 0) {
+      var shadowAmt = shadows * Math.abs(shadows);
+      var highlightAmt = highlights * Math.abs(highlights);
+      var highlightTable = highlights > 0 ? HIGHLIGHT_UP_OFFSET : HIGHLIGHT_DOWN_OFFSET;
       for (var i = 0; i < pixels.length; i++) {
-        var t = Math.max(0, Math.min(255, pixels[i])) / 255;
-        var sx = Math.max(0, Math.min(1, (t - 0.25) / 0.75));  // remap 0.25..1.0 → 0..1
-        var sw = sx * sx * (3 - 2 * sx);  // smoothstep
-        pixels[i] = pixels[i] + highlights * sw;
-      }
-    }
-
-    // 5. Shadows (affect dark pixels via 1 - smoothstep 0.0..0.75)
-    var shadows = parseInt(shadowsSlider.value);
-    if (shadows !== 0) {
-      for (var i = 0; i < pixels.length; i++) {
-        var t = Math.max(0, Math.min(255, pixels[i])) / 255;
-        var sx = Math.max(0, Math.min(1, t / 0.75));  // remap 0.0..0.75 → 0..1
-        var sw = 1 - sx * sx * (3 - 2 * sx);  // 1 - smoothstep
-        pixels[i] = pixels[i] + shadows * sw;
+        var v = Math.max(0, Math.min(255, pixels[i]));
+        if (v <= 128) {
+          pixels[i] = v + shadowAmt * lookup(SHADOW_OFFSET, v);
+        } else {
+          pixels[i] = v + highlightAmt * lookup(highlightTable, v - 128);
+        }
       }
     }
 
@@ -328,7 +334,7 @@
     // 5. Dither / threshold
     var output;
     if (ditherMode === 'threshold') {
-      output = thresholdConvert(pixels, 128);
+      output = thresholdConvert(pixels, parseInt(thresholdSlider.value));
     } else if (ditherMode === 'floyd-steinberg') {
       output = floydSteinberg(pixels, w, h);
     } else if (ditherMode === 'atkinson') {
@@ -341,6 +347,39 @@
 
     // 6. Render
     renderOutput(output, w, h);
+  }
+
+  // Shadows/highlights offsets measured from Windows Photos output
+  // (docs/tone_test). At slider s in -1..1, out = in + s*|s| * offset(in).
+  // Shadows only touch 0..128 and are symmetric. Highlights touch 128..255,
+  // with a different table for each direction (both stored as magnitudes);
+  // the + table above ~224 is extrapolated because every sample clipped to
+  // white there.
+  var SHADOW_OFFSET = [
+    0, 0, 1, 2, 2, 2, 3, 4, 4, 4, 5, 6, 6, 6, 7, 8, 8, 8, 9, 10, 10, 10, 11, 12, 12, 12, 13, 14, 14, 14, 15, 16,
+    16, 16, 17, 18, 18, 18, 19, 20, 20, 20, 21, 21, 22, 22, 22, 22, 22, 23, 23, 23, 23, 23, 23, 23, 24, 24, 24, 24, 24, 24, 24, 24,
+    24, 24, 24, 24, 24, 24, 24, 24, 24, 23, 23, 23, 23, 23, 23, 22, 22, 22, 22, 22, 21, 21, 21, 21, 20, 20, 20, 20, 19, 19, 18, 18,
+    18, 17, 17, 17, 16, 16, 15, 15, 14, 14, 13, 13, 12, 12, 11, 11, 10, 10, 9, 8, 8, 7, 7, 6, 5, 5, 4, 3, 3, 2, 1, 0,
+    0
+  ];
+  var HIGHLIGHT_UP_OFFSET = [
+    0, 1, 2, 3, 3, 4, 5, 6, 7, 8, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+    31, 32, 33, 34, 35, 36, 38, 39, 40, 41, 42, 44, 45, 46, 48, 49, 50, 51, 53, 54, 56, 57, 58, 60, 61, 63, 64, 65, 67, 68, 70, 71,
+    73, 74, 76, 78, 79, 81, 82, 84, 85, 87, 88, 90, 91, 93, 95, 97, 98, 100, 102, 103, 105, 106, 107, 107, 108, 108, 109, 109, 110, 110, 111, 111,
+    112, 112, 112, 112, 112, 112, 112, 112, 112, 112, 112, 112, 112, 112, 112, 112, 112, 112, 112, 112, 112, 112, 112, 112, 112, 112, 112, 112, 112, 112, 112, 112
+  ];
+  var HIGHLIGHT_DOWN_OFFSET = [
+    0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 6, 6, 6, 7, 7, 8, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 12,
+    13, 13, 14, 14, 15, 15, 16, 16, 17, 17, 18, 19, 19, 20, 20, 21, 21, 22, 22, 23, 23, 24, 25, 25, 26, 26, 27, 28, 28, 29, 30, 30,
+    31, 32, 32, 33, 33, 34, 35, 35, 36, 37, 38, 38, 39, 40, 40, 41, 42, 42, 43, 44, 45, 45, 45, 46, 46, 46, 46, 46, 47, 47, 47, 47,
+    47, 48, 48, 48, 48, 48, 49, 49, 49, 49, 49, 50, 50, 50, 50, 50, 51, 51, 51, 51, 52, 52, 52, 52, 52, 53, 53, 53, 53, 54, 54, 54
+  ];
+
+  // Linear interpolation into a table indexed by integer position
+  function lookup(table, pos) {
+    var i = Math.min(Math.floor(pos), table.length - 2);
+    var f = pos - i;
+    return table[i] + (table[i + 1] - table[i]) * f;
   }
 
   function thresholdConvert(pixels, threshold) {
@@ -448,7 +487,8 @@
     [brightnessSlider, brightnessVal],
     [contrastSlider, contrastVal],
     [highlightsSlider, highlightsVal],
-    [shadowsSlider, shadowsVal]
+    [shadowsSlider, shadowsVal],
+    [thresholdSlider, thresholdVal]
   ].forEach(function(pair) {
     pair[0].addEventListener('input', function() {
       pair[1].textContent = this.value;
@@ -491,6 +531,7 @@
       document.querySelectorAll('.mode-btn').forEach(function(b) { b.classList.remove('active'); });
       btn.classList.add('active');
       ditherMode = btn.dataset.mode;
+      updateThresholdRow();
       runPipeline();
     });
   });
